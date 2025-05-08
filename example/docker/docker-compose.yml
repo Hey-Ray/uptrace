@@ -16,6 +16,8 @@ services:
     ports:
       - '8123:8123'
       - '9000:9000'
+    networks:
+      - dokploy-network
 
   postgres:
     image: postgres:17-alpine
@@ -34,10 +36,14 @@ services:
       - 'pg_data:/var/lib/postgresql/data/pgdata'
     ports:
       - '5432:5432'
+    networks:
+      - dokploy-network
 
   redis:
     image: redis:6.2.2-alpine
     restart: on-failure
+    networks:
+      - dokploy-network
 
   uptrace:
     image: 'uptrace/uptrace:2.0.0-beta.1'
@@ -53,6 +59,8 @@ services:
     depends_on:
       - clickhouse
       - postgres
+    networks:
+      - dokploy-network
 
   otelcol:
     image: otel/opentelemetry-collector-contrib:0.123.0
@@ -66,6 +74,8 @@ services:
       - 'host.docker.internal:host-gateway'
     depends_on:
       - uptrace
+    networks:
+      - dokploy-network
 
   mailpit:
     image: axllent/mailpit
@@ -80,11 +90,15 @@ services:
       MP_SMTP_AUTH_ALLOW_INSECURE: 1
     volumes:
       - mailpit_data:/data
+    networks:
+      - dokploy-network
 
   vector:
     image: timberio/vector:0.28.X-alpine
     volumes:
       - ./vector.toml:/etc/vector/vector.toml:ro
+    networks:
+      - dokploy-network
 
   grafana:
     image: grafana/grafana:9.5.3
@@ -96,6 +110,8 @@ services:
       - '3300:3300'
     extra_hosts:
       - 'host.docker.internal:host-gateway'
+    networks:
+      - dokploy-network
 
   prometheus:
     image: prom/prometheus:v2.36.2
@@ -110,6 +126,8 @@ services:
       - '--web.console.templates=/usr/share/prometheus/consoles'
     extra_hosts:
       - 'host.docker.internal:host-gateway'
+    networks:
+      - dokploy-network
 
   node_exporter:
     image: quay.io/prometheus/node-exporter:latest
@@ -121,6 +139,8 @@ services:
     restart: unless-stopped
     volumes:
       - '/:/host:ro,rslave'
+    networks:
+      - dokploy-network
 
 volumes:
   ch_data:
