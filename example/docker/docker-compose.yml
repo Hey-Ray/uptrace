@@ -82,7 +82,6 @@ services:
     restart: always
     ports:
       - 1025:1025
-      - 8025:8025
     environment:
       MP_MAX_MESSAGES: 5000
       MP_DATA_FILE: /data/mailpit.db
@@ -92,6 +91,7 @@ services:
       - mailpit_data:/data
     networks:
       - internal
+      - dokploy-network
 
   vector:
     image: timberio/vector:0.28.X-alpine
