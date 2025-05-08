@@ -54,7 +54,7 @@ services:
       - ./uptrace.yml:/etc/uptrace/config.yml
     ports:
       - '14317:4317'
-      - '14318:80'
+      # - '14318:80'
     depends_on:
       - clickhouse
       - postgres
