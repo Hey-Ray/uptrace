@@ -1,3 +1,5 @@
+version: '3.8'
+
 services:
   clickhouse:
     image: clickhouse/clickhouse-server:25.3.3
@@ -17,7 +19,7 @@ services:
       - '8123:8123'
       - '9000:9000'
     networks:
-      - dokploy-network
+      - internal
 
   postgres:
     image: postgres:17-alpine
@@ -33,26 +35,23 @@ services:
       timeout: 1s
       retries: 30
     volumes:
-      - 'pg_data:/var/lib/postgresql/data/pgdata'
+      - pg_data:/var/lib/postgresql/data/pgdata
     ports:
       - '5432:5432'
     networks:
-      - dokploy-network
+      - internal
 
   redis:
     image: redis:6.2.2-alpine
     restart: on-failure
     networks:
-      - dokploy-network
+      - internal
 
   uptrace:
-    image: 'uptrace/uptrace:2.0.0-beta.1'
-    #image: 'uptrace/uptrace-dev:latest'
+    image: uptrace/uptrace:2.0.0-beta.1
     restart: on-failure
     volumes:
       - ./uptrace.yml:/etc/uptrace/config.yml
-    #environment:
-    #  - DEBUG=2
     ports:
       - '14317:4317'
       - '14318:80'
@@ -60,6 +59,7 @@ services:
       - clickhouse
       - postgres
     networks:
+      - internal
       - dokploy-network
 
   otelcol:
@@ -75,7 +75,7 @@ services:
     depends_on:
       - uptrace
     networks:
-      - dokploy-network
+      - internal
 
   mailpit:
     image: axllent/mailpit
@@ -91,14 +91,14 @@ services:
     volumes:
       - mailpit_data:/data
     networks:
-      - dokploy-network
+      - internal
 
   vector:
     image: timberio/vector:0.28.X-alpine
     volumes:
       - ./vector.toml:/etc/vector/vector.toml:ro
     networks:
-      - dokploy-network
+      - internal
 
   grafana:
     image: grafana/grafana:9.5.3
@@ -111,7 +111,7 @@ services:
     extra_hosts:
       - 'host.docker.internal:host-gateway'
     networks:
-      - dokploy-network
+      - internal
 
   prometheus:
     image: prom/prometheus:v2.36.2
@@ -127,7 +127,7 @@ services:
     extra_hosts:
       - 'host.docker.internal:host-gateway'
     networks:
-      - dokploy-network
+      - internal
 
   node_exporter:
     image: quay.io/prometheus/node-exporter:latest
@@ -145,3 +145,9 @@ volumes:
   pg_data:
   prometheus_data:
   mailpit_data:
+
+networks:
+  internal:
+    driver: bridge
+  dokploy-network:
+    external: true
