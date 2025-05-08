@@ -139,8 +139,6 @@ services:
     restart: unless-stopped
     volumes:
       - '/:/host:ro,rslave'
-    networks:
-      - dokploy-network
 
 volumes:
   ch_data:
